@@ -214,13 +214,17 @@ class Plugin(GlancesPlugin):
 
             # Start new thread for new container
             for container in containers:
-                if container.id not in self.thread_list:
+                if container.id not in self.thread_list or self.thread_list[container.id].stopped():
                     # Thread did not exist in the internal dict
                     # Create it and add it to the internal dict
                     logger.debug(
                         "{} plugin - Create thread for container {}".format(self.plugin_name, container.id[:12])
                     )
                     t = ThreadDockerGrabber(container)
+
+                    if self.thread_list.get(container.id):
+                        del self.thread_list[container.id]
+
                     self.thread_list[container.id] = t
                     t.start()
 
